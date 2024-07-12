@@ -2,7 +2,7 @@
 import HeroIcons from './icons';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { SiGithub } from 'react-icons/si';
+import { SiComicfury } from 'react-icons/si';
 import { IoDocumentText } from 'react-icons/io5';
 
 import { useEffect, useState } from 'react';
@@ -59,9 +59,9 @@ export default function Hero({ locale, CTALocale }) {
 							<a
 								title='get source code'
 								className='btn btn-sm md:btn-md btn-base border-none hover:ring-1 ring-base-content text-base-100 hover:text-base-content bg-base-content hover:bg-base-100 rounded-full'
-								href='https://github.com/huglemon/inwind-landing-page'
+								href='/comic-generator'
 							>
-								<SiGithub />
+								<SiComicfury />
 								{CTALocale.btn1}
 							</a>
 							<a
