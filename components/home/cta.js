@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
-import { SiGithub } from 'react-icons/si';
+import { SiComicfury } from 'react-icons/si';
 
 export default function Cta({ locale, CTALocale }) {
 	return (
@@ -27,7 +27,7 @@ export default function Cta({ locale, CTALocale }) {
 						className='mt-10 btn btn-sm md:btn-md btn-base border-none hover:ring-1 ring-base-content text-base-100 hover:text-base-content bg-base-content hover:bg-base-100 rounded-full'
 						href='#'
 					>
-						<SiGithub /> {CTALocale.btn1}
+						<SiComicfury /> {CTALocale.btn1}
 					</a>
 				</div>
 			</motion.div>

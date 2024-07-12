@@ -59,11 +59,12 @@ export default function Footer() {
 				<p>
 					©{' '}
 					<a
-						title={'huglemon'}
-						href='http://huglemon.com?rel=landingpage'
+						// title={'huglemon'}
+						// href='http://huglemon.com?rel=landingpage'
+						href="#"
 						target='_blank'
 					>
-						hugLemon
+						Dify-Demo-Team4
 					</a>{' '}
 					present.
 				</p>

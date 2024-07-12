@@ -1,40 +1,40 @@
 {
-	"Hero": {
-		"h1": "Make Landing Page Faster",
-		"h2": "This is a free, open-source and powerful landing page template for saas project, it will help you to make your startup faster."
-	},
-	"Feature": {
-		"h2": "Our Feature",
-		"h3": "Features of inWind Landing Page Template",
-		"description1": "Awesome landing page template.",
-		"description2": "Based on Next.JS, DaisyUI, TailwinCSS and other powerful libary.",
-		"description3": "Completely open source and completely free."
-	},
-	"Pricing": {
-		"h2": "Our Pricing",
-		"h3": "Choose Your Plan",
-		"description": "Select the plan that best fits your needs.",
-		"doYouLike": "你喜欢这个落地页模板吗？",
-		"follow": "关注我的推特。"
-	},
-	"Testimonial": {
-		"h2": "Testimonials",
-		"h3": "Wall of Love",
-		"description1": "If you use this landing page template and recommend it on your Twitter,",
-		"description2": "please let me know",
-		"description3": ",I will display your tweet and recommendation here."
-	},
-	"Faq": {
-		"h2": "FAQ",
-		"h3": "Frequently Asked Questions",
-		"description": "Here are some of the most frequently asked questions."
-	},
-	"CTA": {
-		"h2": "Build Your Landing Page Now",
-		"h3": "Build your landing page, show your product, and start earning!"
-	},
-	"CTAButton": {
-		"btn1": "Get Source Code",
-		"btn2": "View Docs"
-	}
+  "Hero": {
+    "h1": "AI Comic Workshop",
+    "h2": "AI-Comic-Workshop is a free, open-source comic creation tool that allows you to quickly generate storyboards and comic images by inputting minimal content, making it easy to create professional-quality comic works."
+  },
+  "Feature": {
+    "h2": "Key Features",
+    "h3": "Core Capabilities of AI-Comic-Workshop",
+    "description1": "Input your creative story, and the system will automatically generate a storyboard script based on the content.",
+    "description2": "Based on the generated storyboard script, the system will intelligently draw the corresponding comic images.",
+    "description3": "Finally, you can export a complete comic poster work."
+  },
+  "Pricing": {
+    "h2": "Pricing Plans",
+    "h3": "Choose the plan that suits you best",
+    "description": "AI-Comic-Workshop offers both a free version and a professional version to meet different usage needs.",
+    "doYouLike": "What do you think of this tool?",
+    "follow": "Follow our social accounts to learn more."
+  },
+  "Testimonial": {
+    "h2": "User Testimonials",
+    "h3": "What They're Saying",
+    "description1": "If you have used AI-Comic-Workshop and shared your work on social media,",
+    "description2": "please let us know your feedback,",
+    "description3": "and we will display your valuable comments here."
+  },
+  "Faq": {
+    "h2": "FAQs",
+    "h3": "Questions & Answers",
+    "description": "Here are some common questions and answers about AI-Comic-Workshop."
+  },
+  "CTA": {
+    "h2": "Start Your Comic Creation Journey",
+    "h3": "Experience AI-Comic-Workshop now and create professional-level comic works!"
+  },
+  "CTAButton": {
+    "btn1": "Sign Up for Free",
+    "btn2": "Learn More"
+  }
 }
