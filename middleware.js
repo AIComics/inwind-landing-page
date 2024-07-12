@@ -14,4 +14,4 @@ export function middleware(request) {
 
 export const config = {
 	matcher: ['/((?!_next)(?!.*\\.(?:ico|png|gif|svg|jpg|jpeg|xml|txt|mp4)$)(?!/api).*)'],
-};
+};``

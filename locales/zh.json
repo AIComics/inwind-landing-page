@@ -1,40 +1,40 @@
 {
-	"Hero": {
-		"h1": "快速制作落地页",
-		"h2": "这是一个免费、开源且功能强大的落地页模板，适用于SaaS项目，它将帮助您更快地启动您的创业项目。"
-	},
-	"Feature": {
-		"h2": "Feature",
-		"h3": "乘风-落地页模板的特点",
-		"description1": "出色的落地页模板。",
-		"description2": "基于Next.JS、DaisyUI、TailwindCSS和其他强大的库。",
-		"description3": "完全开源且完全免费。"
-	},
-	"Pricing": {
-		"h2": "Pricing",
-		"h3": "选择您的计划",
-		"description": "选择最适合您需求的计划。",
-		"doYouLike": "你喜欢这个落地页模板吗？",
-		"follow": "关注我的推特。"
-	},
-	"Testimonial": {
-		"h2": "Testimonial",
-		"h3": "Wall of Love",
-		"description1": "如果您使用这个落地页模板并在您的推特上推荐它，",
-		"description2": "请告诉我",
-		"description3": "，我会在这里展示您的推文和推荐。"
-	},
-	"Faq": {
-		"h2": "FAQ",
-		"h3": "常见问题",
-		"description": "以下是一些最常见的问题。"
-	},
-	"CTA": {
-		"h2": "立即构建您的落地页",
-		"h3": "构建您的落地页，展示您的产品，并开始盈利！"
-	},
-	"CTAButton": {
-		"btn1": "获取源代码",
-		"btn2": "查看文档"
-	}
+  "Hero": {
+    "h1": "AI 漫画工坊",
+    "h2": "AI-Comic-Workshop 是一款免费、开源的漫画创作工具,只需输入少量内容,即可快速生成分镜脚本和漫画图片,让您轻松打造专业水准的漫画作品。"
+  },
+  "Feature": {
+    "h2": "主要功能",
+    "h3": "AI-Comic-Workshop 的核心特点",
+    "description1": "输入您的创意故事,系统会根据内容自动生成分镜脚本。",
+    "description2": "根据生成的分镜脚本,系统会智能绘制相应的漫画图片。",
+    "description3": "最终您可以导出一张完整的漫画海报作品。"
+  },
+  "Pricing": {
+    "h2": "价格方案",
+    "h3": "选择适合您的计划",
+    "description": "AI-Comic-Workshop 提供免费版和专业版两种价格计划,满足不同使用需求。",
+    "doYouLike": "你觉得这个工具如何?",
+    "follow": "关注我们的社交账号了解更多。"
+  },
+  "Testimonial": {
+    "h2": "用户评价",
+    "h3": "他们都在说",
+    "description1": "如果您使用过 AI-Comic-Workshop 并在社交媒体上分享了作品,",
+    "description2": "欢迎告诉我们您的感受,",
+    "description3": "我们会在此展示您的宝贵反馈。"
+  },
+  "Faq": {
+    "h2": "常见问题",
+    "h3": "问题解答",
+    "description": "以下是关于 AI-Comic-Workshop 的一些常见问题及解答。"
+  },
+  "CTA": {
+    "h2": "开启您的漫画创作之旅",
+    "h3": "立即体验 AI-Comic-Workshop,打造专业级漫画作品!"
+  },
+  "CTAButton": {
+    "btn1": "免费注册",
+    "btn2": "了解更多"
+  }
 }
