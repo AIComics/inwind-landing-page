@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.4",
+    "axios": "^1.7.2",
     "framer-motion": "^11.2.12",
     "lucide-react": "^0.408.0",
     "negotiator": "^0.6.3",
@@ -21,6 +22,8 @@
     "react-icons": "^5.2.1"
   },
   "devDependencies": {
+    "@types/node": "20.14.10",
+    "@types/react": "18.3.3",
     "daisyui": "^4.11.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.4",
