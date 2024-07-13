@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Edit2, Image, Save, Loader } from "lucide-react";
 
 const GeneratorStatus = {
@@ -9,13 +9,22 @@ const GeneratorStatus = {
   COMIC_GENERATED: "COMIC_GENERATED",
 };
 
-// Mock functions
-const generateMockScripts = (story: string) => {
+const generateMockScripts = async (story: string) => {
+  // const scriptsData = await fetch("/api/dify/generateScripts", {
+  //   method: "POST",
+  //   body: JSON.stringify({ story }),
+  // });
+  // console.log("scriptsData: ", scriptsData);
+
   return [
-    "A person walking under the sun",
-    "The person looks tired and thirsty",
-    "They spot a water fountain nearby",
-    "Refreshed, they continue their journey with a smile",
+    "1-A person walking under the sun",
+    "2-The person looks tired and thirsty",
+    "3-They spot a water fountain nearby",
+    "4-Refreshed, they continue their journey with a smile",
+    "5-A person walking under the sun",
+    "6-The person looks tired and thirsty",
+    "7-They spot a water fountain nearby",
+    "8-Refreshed, they continue their journey with a smile",
   ];
 };
 
@@ -26,15 +35,15 @@ const generateMockComic = (scripts: any[]) => {
 const ComicGenerator = () => {
   const [story, setStory] = useState("");
   const [panels, setPanels] = useState(
-    Array(4).fill({ script: "", image: "", isImageView: true })
+    Array(8).fill({ script: "", image: "", isImageView: true })
   );
   const [status, setStatus] = useState(GeneratorStatus.STORY_INPUT);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGenerateScript = () => {
     setIsLoading(true);
-    setTimeout(() => {
-      const generatedScripts = generateMockScripts(story);
+    setTimeout(async () => {
+      const generatedScripts = await generateMockScripts(story);
       setPanels(
         panels.map((panel, index) => ({
           ...panel,
@@ -121,13 +130,14 @@ const ComicGenerator = () => {
       {status !== GeneratorStatus.STORY_INPUT && (
         <div className="grid grid-cols-2 gap-4 mb-4">
           {panels.map((panel, index) => (
-            <div key={index} className="relative border rounded p-2 h-40">
+            <div key={index} className="relative border rounded p-2">
               {status === GeneratorStatus.COMIC_GENERATED &&
               panel.isImageView ? (
                 <img
-                  src={panel.image}
+                  // src={panel.image}
+                  src="https://images.pexels.com/photos/7022676/pexels-photo-7022676.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
                   alt={`Panel ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  // className="w-full h-full object-cover"
                 />
               ) : (
                 <textarea
@@ -173,7 +183,7 @@ const ComicGenerator = () => {
         <button
           onClick={handleGenerateComic}
           disabled={
-            isLoading || panels.some((panel) => panel.script.trim() === "")
+            isLoading || panels.some((panel) => panel.script?.trim() === "")
           }
           className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
         >
