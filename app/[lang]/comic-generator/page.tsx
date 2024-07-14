@@ -34,13 +34,14 @@ const ComicGenerator = () => {
       }
     );
 
-    const { data } = await result.json();
     try {
+      const { data } = await result.json();
       const targetPhotoData: string[] = JSON.parse(data.outputs?.text);
       setEndImageUrl(targetPhotoData["88"][0]); // 临时处理，直接拿最后一张
       setIsLoading(false);
       setStatus(GeneratorStatus.GENERATED);
     } catch (error) {
+      setIsLoading(false);
       setStatus(GeneratorStatus.GENERATED);
     }
 
