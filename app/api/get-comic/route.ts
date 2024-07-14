@@ -83,6 +83,6 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.log("🚀 ~ GET ~ error:", error)
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return new NextResponse(JSON.stringify(error), { status: 500 });
   }
 }

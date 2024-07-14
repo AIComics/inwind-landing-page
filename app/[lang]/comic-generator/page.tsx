@@ -35,12 +35,14 @@ const ComicGenerator = () => {
     );
 
     try {
-      const { data } = await result.json();
-      const targetPhotoData: string[] = JSON.parse(data.outputs?.text);
+      const rowData = await result.json();
+      console.log("🚀 ~ handleGenerateScript ~ rowData:", rowData);
+      const targetPhotoData: string[] = JSON.parse(rowData.data.outputs?.text);
       setEndImageUrl(targetPhotoData["88"][0]); // 临时处理，直接拿最后一张
       setIsLoading(false);
       setStatus(GeneratorStatus.GENERATED);
     } catch (error) {
+      console.log("🚀 ~ handleGenerateScript ~ error:", error);
       setIsLoading(false);
       setStatus(GeneratorStatus.GENERATED);
     }
