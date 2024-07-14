@@ -2,7 +2,17 @@
 
 // respData函数用于生成一个成功的响应，它接受一个数据对象作为参数，并将其作为响应的data字段返回
 export function respData(data: any) {
+  console.log('data in resp :>> ', data);
   return respJson(0, "ok", data || []);
+}
+
+export function respDifyData(resData: any) {
+  return new Response(JSON.stringify(resData.data), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 }
 
 // respOk函数用于生成一个成功的响应，但不包含任何数据
@@ -20,10 +30,10 @@ export function respJson(code: number, message: string, data?: any) {
   let json = {
     code: code,
     message: message,
-    data: data,
+    respData: data,
   };
   if (data) {
-    json["data"] = data;
+    json["respData"] = data;
   }
 
   return Response.json(json);

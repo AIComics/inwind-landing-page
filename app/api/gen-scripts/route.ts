@@ -1,40 +1,80 @@
+import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
-import fs from 'fs';
 
-import { respData, respErr } from '@/lib/resp';
+export async function GET(req: NextRequest) {
+  const topic = req.nextUrl.searchParams.get('topic');
+  
+  if (!topic) {
+    return new NextResponse('Missing topic parameter', { status: 400 });
+  }
 
-// Function to save error to a JSON file
-function saveErrorToJson(error: any) {
-  const errorJson = JSON.stringify(error, null, 2);
-  fs.writeFileSync('D:/error.json', errorJson);
-}
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    return new NextResponse('No API key found', { status: 500 });
+  }
 
-export async function POST(req: Request) {
-  console.log('》》》走到api了:>> ');
+  const encoder = new TextEncoder();
+
   try {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-      throw new Error('No API key found');
-    }
+    const stream = new ReadableStream({
+      async start(controller) {
+        const sendEvent = (event: string, data: any) => {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ event, data })}\n\n`));
+        };
 
-    const data = await axios.post(
-      'https://dify.tonori.cn/v1/workflows/run',
-      {
-        inputs: {},
-        response_mode: 'streaming',
-        user: 'abc-123',
+        sendEvent('debug', { message: 'Stream started' });
+
+        const response = await axios.post(
+          'https://dify.tonori.cn/v1/workflows/run',
+          {
+            inputs: { topic, typesetting: '0' },
+            response_mode: 'streaming',
+            user: 'abc-123',
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            responseType: 'stream',
+          }
+        );
+
+        response.data.on('data', (chunk: Buffer) => {
+          const rawData = chunk.toString();
+          sendEvent('debug', { rawData });
+
+          const lines = rawData.split('\n');
+          for (const line of lines) {
+            if (line.trim() !== '') {
+              try {
+                // Check if the line starts with "data: "
+                const jsonStr = line.startsWith('data: ') ? line.slice(6) : line;
+                const parsedData = JSON.parse(jsonStr);
+                sendEvent('data', parsedData);
+              } catch (error) {
+                sendEvent('error', { message: 'Error parsing JSON', data: line, error: error.message });
+              }
+            }
+          }
+        });
+
+        response.data.on('end', () => {
+          sendEvent('debug', { message: 'Stream ended' });
+          controller.close();
+        });
       },
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    return respData(data);
-  } catch (e) {
-    saveErrorToJson(e);
-    // console.log('axios request failed: ', e);
-    return respErr('axios request failed');
+    });
+
+    return new NextResponse(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
+  } catch (error) {
+    console.error('Error in API route:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

@@ -1,213 +1,184 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Edit2, Image, Save, Loader } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Edit2, Image, Save, Loader, Search } from 'lucide-react';
 
 const GeneratorStatus = {
-  STORY_INPUT: 'STORY_INPUT',
-  SCRIPT_GENERATED: 'SCRIPT_GENERATED',
-  COMIC_GENERATED: 'COMIC_GENERATED',
-};
-
-const fetchDifyInfo = async function () {
-  try {
-    const uri = '/api/gen-scripts';
-    const params = {};
-
-    const resp = await fetch(uri, {
-      method: 'POST',
-      body: JSON.stringify(params),
-    });
-
-    // if (resp.ok) {
-    //   const data = await resp.json();
-    //   console.log('fetch dify info success: ', data);
-    //   return data;
-    // }
-  } catch (e) {
-    console.log('error dify info :>> ', e);
-  }
-};
-
-// Mock functions
-const generateMockScripts = (story: string) => {
-  return [
-    'A person walking under the sun',
-    'The person looks tired and thirsty',
-    'They spot a water fountain nearby',
-    'Refreshed, they continue their journey with a smile',
-  ];
-};
-
-const generateMockComic = (scripts: any[]) => {
-  return scripts.map(() => '/api/placeholder/200/200');
+  TOPIC_INPUT: 'TOPIC_INPUT',
+  GENERATING: 'GENERATING',
+  GENERATED: 'GENERATED',
 };
 
 const ComicGenerator = () => {
-  const [story, setStory] = useState('');
-  const [panels, setPanels] = useState(
-    Array(4).fill({ script: '', image: '', isImageView: true })
-  );
-  const [status, setStatus] = useState(GeneratorStatus.STORY_INPUT);
+  const [topic, setTopic] = useState('');
+  const [panels, setPanels] = useState([]);
+  const [status, setStatus] = useState(GeneratorStatus.TOPIC_INPUT);
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingData, setStreamingData] = useState([]);
 
-  useEffect(() => {
-    fetchDifyInfo();
-  }, []);
-
-  const handleGenerateScript = () => {
+  const handleGenerateScript = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      const generatedScripts = generateMockScripts(story);
-      setPanels(
-        panels.map((panel, index) => ({
-          ...panel,
-          script: generatedScripts[index],
-        }))
-      );
-      setStatus(GeneratorStatus.SCRIPT_GENERATED);
+    setStatus(GeneratorStatus.GENERATING);
+    setStreamingData([]);
+    setPanels([]);
+
+    const eventSource = new EventSource(`/api/gen-scripts?topic=${encodeURIComponent(topic)}`);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('Streaming data:', data);
+        setStreamingData(prevData => [...prevData, data]);
+
+        if (data.event === 'data' && data.data.event === 'node_finished' && data.data.data.index === 4) {
+          console.log('!!!! Comic generation node finished !!!!!');
+          const nodeData = data.data.data;
+          
+          // Extract panel texts
+          if (nodeData.inputs) {
+            const panelTexts = [];
+            for (let i = 1; i <= 8; i++) {
+              const key = `text_bottom_${i}`;
+              if (nodeData.inputs[key]) {
+                panelTexts.push({
+                  section: `Panel ${i}`,
+                  text: nodeData.inputs[key],
+                  imageUrl: null, // We'll update this later
+                });
+              }
+            }
+            setPanels(panelTexts);
+          }
+
+          // Extract and assign image URLs
+          try {
+            console.log('Image generation node data:', nodeData);
+            const imageUrlsData = JSON.parse(nodeData.outputs.text);
+            console.log('Parsed image URLs data:', imageUrlsData);
+            
+            // Sort the keys (which are numbers) and get the corresponding URLs
+            const sortedUrls = Object.keys(imageUrlsData)
+              .sort((a, b) => parseInt(a) - parseInt(b))
+              .map(key => imageUrlsData[key][0])
+              .filter(url => !url.includes('PreviewBridge')); // Filter out preview images
+
+            setPanels(prevPanels => 
+              prevPanels.map((panel, index) => ({
+                ...panel,
+                imageUrl: sortedUrls[index] || null,
+              }))
+            );
+
+            setStatus(GeneratorStatus.GENERATED);
+          } catch (error) {
+            console.error('Error parsing image URLs:', error);
+          }
+        }
+
+        if (data.event === 'workflow_finished') {
+          eventSource.close();
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error processing SSE data:', error);
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('SSE error:', error);
+      eventSource.close();
       setIsLoading(false);
-    }, 1500);
+      setStatus(GeneratorStatus.TOPIC_INPUT);
+    };
   };
 
-  const handleGenerateComic = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      const generatedComics = generateMockComic(panels.map((p) => p.script));
-      setPanels(
-        panels.map((panel, index) => ({
-          ...panel,
-          image: generatedComics[index],
-          isImageView: true,
-        }))
-      );
-      setStatus(GeneratorStatus.COMIC_GENERATED);
-      setIsLoading(false);
-    }, 3000);
-  };
-
-  const handleScriptChange = (index: number, script: string) => {
-    setPanels(
-      panels.map((panel, i) => (i === index ? { ...panel, script } : panel))
+  const renderPanels = () => {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {panels.map((panel, index) => (
+          <div key={index} className="flex flex-col border rounded overflow-hidden">
+            <div className="w-full aspect-square bg-gray-200 flex items-center justify-center">
+              {panel.imageUrl ? (
+                <img 
+                  src={panel.imageUrl} 
+                  alt={`Panel ${index + 1}`} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error(`Error loading image for panel ${index + 1}:`, e);
+                    e.target.src = '/api/placeholder/400/400';
+                  }}
+                />
+              ) : (
+                <span className="text-gray-500">Image</span>
+              )}
+            </div>
+            <div className="p-2 bg-white">
+              <p className="text-sm">{panel.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     );
-  };
-
-  const handleToggleView = (index: number) => {
-    setPanels(
-      panels.map((panel, i) =>
-        i === index ? { ...panel, isImageView: !panel.isImageView } : panel
-      )
-    );
-  };
-
-  const handleSaveScript = (index: number) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      const newImage = '/api/placeholder/200/200';
-      setPanels(
-        panels.map((panel, i) =>
-          i === index ? { ...panel, image: newImage, isImageView: true } : panel
-        )
-      );
-      setIsLoading(false);
-    }, 1500);
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Comic Generator</h1>
-      <div className="mb-4">
-        <label htmlFor="story" className="block mb-2">
-          Input Story
-        </label>
-        <textarea
-          id="story"
-          value={story}
-          onChange={(e) => setStory(e.target.value)}
-          className="w-full p-2 border rounded"
-          rows="3"
-          disabled={status !== GeneratorStatus.STORY_INPUT}
-        />
-      </div>
-      {status === GeneratorStatus.STORY_INPUT && (
-        <button
-          onClick={handleGenerateScript}
-          disabled={isLoading || story.trim() === ''}
-          className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 disabled:bg-gray-400 mb-4"
-        >
-          {isLoading ? (
-            <Loader className="animate-spin mx-auto" />
-          ) : (
-            'Generate Script'
-          )}
-        </button>
-      )}
-      {status !== GeneratorStatus.STORY_INPUT && (
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          {panels.map((panel, index) => (
-            <div key={index} className="relative border rounded p-2 h-40">
-              {status === GeneratorStatus.COMIC_GENERATED &&
-              panel.isImageView ? (
-                <img
-                  src={panel.image}
-                  alt={`Panel ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
+    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-4xl font-extrabold text-gray-900 text-center mb-8">Comic Generator</h1>
+        <div className="relative mb-12">
+          <div className="relative rounded-full shadow-sm">
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="Start with a topic..."
+              className="block w-full pr-24 sm:pr-32 py-3 pl-6 text-lg leading-6 rounded-full border-2 border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+            />
+            <button
+              onClick={handleGenerateScript}
+              disabled={isLoading || topic.trim() === ''}
+              className="absolute right-1 top-1 bottom-1 px-4 sm:px-6 flex items-center justify-center text-sm font-medium rounded-full text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+            >
+              {isLoading ? (
+                <Loader className="animate-spin h-5 w-5" />
               ) : (
-                <textarea
-                  value={panel.script}
-                  onChange={(e) => handleScriptChange(index, e.target.value)}
-                  className="w-full h-full resize-none"
-                  placeholder={`Panel ${index + 1} script`}
-                  disabled={
-                    status === GeneratorStatus.COMIC_GENERATED &&
-                    panel.isImageView
-                  }
-                />
+                <>
+                  <Search className="h-5 w-5 mr-2" />
+                  Generate
+                </>
               )}
-              {status === GeneratorStatus.COMIC_GENERATED && (
-                <div className="absolute top-1 right-1 flex">
-                  <button
-                    onClick={() => handleToggleView(index)}
-                    className="p-1 bg-white rounded-full shadow mr-1"
-                    title={panel.isImageView ? 'Edit script' : 'View image'}
-                  >
-                    {panel.isImageView ? (
-                      <Edit2 size={16} />
-                    ) : (
-                      <Image size={16} />
-                    )}
-                  </button>
-                  {!panel.isImageView && (
-                    <button
-                      onClick={() => handleSaveScript(index)}
-                      className="p-1 bg-white rounded-full shadow"
-                      title="Save and regenerate"
-                    >
-                      <Save size={16} />
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+            </button>
+          </div>
         </div>
-      )}
-      {status === GeneratorStatus.SCRIPT_GENERATED && (
-        <button
-          onClick={handleGenerateComic}
-          disabled={
-            isLoading || panels.some((panel) => panel.script.trim() === '')
-          }
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-        >
-          {isLoading ? (
-            <Loader className="animate-spin mx-auto" />
-          ) : (
-            'Generate Comic'
-          )}
-        </button>
-      )}
+
+        {status === GeneratorStatus.GENERATING && (
+          <div className="text-center mb-12">
+            <Loader className="animate-spin h-10 w-10 mx-auto text-indigo-600 mb-4" />
+            <p className="text-lg text-gray-600">Crafting your comic masterpiece...</p>
+          </div>
+        )}
+
+        <div className="mb-12">
+          {renderPanels()}
+        </div>
+
+        <div className="bg-gray-50 rounded-lg shadow-md p-8 mt-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">How to Use the Comic Generator</h2>
+          <ol className="list-decimal list-inside space-y-4 text-gray-700">
+            <li>Enter an interesting topic or theme for your comic in the input field above.</li>
+            <li>Click the "Generate" button to start the AI-powered creation process.</li>
+            <li>Wait a moment while our advanced AI generates a unique 8-panel comic based on your topic.</li>
+            <li>Once complete, your comic will appear as a series of images with captions below.</li>
+            <li>Each panel represents a part of the story, creating a narrative flow from beginning to end.</li>
+            <li>If you're not satisfied, try again with a different topic or more specific details.</li>
+            <li>Remember, AI can be unpredictable – embrace unexpected or amusing results as part of the creative process!</li>
+            <li>Have fun exploring various ideas and see what kind of comics you can bring to life!</li>
+          </ol>
+          <p className="mt-6 text-sm text-gray-500">
+            Note: This tool uses advanced AI to generate comics. While we strive for appropriate content, occasionally unexpected results may occur. Please use responsibly and enjoy the creative journey!
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
