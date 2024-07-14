@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Edit2, Image, Save, Loader, Search } from "lucide-react";
+import { Edit2, Save, Loader, Search } from "lucide-react";
+import { Image } from "antd";
 
 const GeneratorStatus = {
   TOPIC_INPUT: "TOPIC_INPUT",
@@ -15,6 +16,7 @@ const ComicGenerator = () => {
   const [status, setStatus] = useState(GeneratorStatus.TOPIC_INPUT);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingData, setStreamingData] = useState([]);
+  const [endImageUrl, setEndImageUrl] = useState<string>("");
 
   const handleGenerateScript = async () => {
     setIsLoading(true);
@@ -22,111 +24,143 @@ const ComicGenerator = () => {
     setStreamingData([]);
     setPanels([]);
 
-    const eventSource = new EventSource(
-      `/api/gen-scripts?topic=${encodeURIComponent(topic)}`
+    const result = await fetch(
+      `/api/get-comic?topic=${encodeURIComponent(topic)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
 
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log("Streaming data:", data);
-        setStreamingData((prevData) => [...prevData, data]);
-
-        if (
-          data.event === "data" &&
-          data.data.event === "node_finished" &&
-          data.data.data.index === 4
-        ) {
-          console.log("!!!! Comic generation node finished !!!!!");
-          const nodeData = data.data.data;
-
-          // Extract panel texts
-          if (nodeData.inputs) {
-            const panelTexts = [];
-            for (let i = 1; i <= 8; i++) {
-              const key = `text_bottom_${i}`;
-              if (nodeData.inputs[key]) {
-                panelTexts.push({
-                  section: `Panel ${i}`,
-                  text: nodeData.inputs[key],
-                  imageUrl: null, // We'll update this later
-                });
-              }
-            }
-            setPanels(panelTexts);
-          }
-
-          // Extract and assign image URLs
-          try {
-            console.log("Image generation node data:", nodeData);
-            const imageUrlsData = JSON.parse(nodeData.outputs.text);
-            console.log("Parsed image URLs data:", imageUrlsData);
-
-            // Sort the keys (which are numbers) and get the corresponding URLs
-            const sortedUrls = Object.keys(imageUrlsData)
-              .sort((a, b) => parseInt(a) - parseInt(b))
-              .map((key) => imageUrlsData[key][0])
-              .filter((url) => !url.includes("PreviewBridge")); // Filter out preview images
-
-            setPanels((prevPanels) =>
-              prevPanels.map((panel, index) => ({
-                ...panel,
-                imageUrl: sortedUrls[index] || null,
-              }))
-            );
-
-            setStatus(GeneratorStatus.GENERATED);
-          } catch (error) {
-            console.error("Error parsing image URLs:", error);
-          }
-        }
-
-        if (data.event === "workflow_finished") {
-          eventSource.close();
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error("Error processing SSE data:", error);
-      }
-    };
-
-    eventSource.onerror = (error) => {
-      console.error("SSE error:", error);
-      eventSource.close();
+    const { data } = await result.json();
+    try {
+      const targetPhotoData: string[] = JSON.parse(data.outputs?.text);
+      setEndImageUrl(targetPhotoData["88"][0]); // 临时处理，直接拿最后一张
       setIsLoading(false);
-      setStatus(GeneratorStatus.TOPIC_INPUT);
-    };
+      setStatus(GeneratorStatus.GENERATED);
+    } catch (error) {
+      setStatus(GeneratorStatus.GENERATED);
+    }
+
+    // const arr = [];
+    // for (let i = 0; i < targetPhotoData.length; i++) {
+    //   arr.push({
+    //     section: `Panel ${i}`,
+    //     text: "",
+    //     imageUrl: targetPhotoData[i],
+    //   });
+    // }
+    // setPanels(arr);
+
+    // return;
+
+    // const eventSource = new EventSource(
+    //   `/api/gen-scripts?topic=${encodeURIComponent(topic)}`
+    // );
+    // eventSource.onmessage = (event) => {
+    //   try {
+    //     const data = JSON.parse(event.data);
+    //     console.log("Streaming data:", data);
+    //     setStreamingData((prevData) => [...prevData, data]);
+
+    //     if (
+    //       data.event === "data" &&
+    //       data.data.event === "node_finished" &&
+    //       data.data.data.index === 4
+    //     ) {
+    //       console.log("!!!! Comic generation node finished !!!!!");
+    //       const nodeData = data.data.data;
+
+    //       // Extract panel texts
+    //       if (nodeData.inputs) {
+    //         const panelTexts = [];
+    //         for (let i = 1; i <= 8; i++) {
+    //           const key = `text_bottom_${i}`;
+    //           if (nodeData.inputs[key]) {
+    //             panelTexts.push({
+    //               section: `Panel ${i}`,
+    //               text: nodeData.inputs[key],
+    //               imageUrl: null, // We'll update this later
+    //             });
+    //           }
+    //         }
+    //         setPanels(panelTexts);
+    //       }
+
+    //       // Extract and assign image URLs
+    //       try {
+    //         console.log("Image generation node data:", nodeData);
+    //         const imageUrlsData = JSON.parse(nodeData.outputs.text);
+    //         console.log("Parsed image URLs data:", imageUrlsData);
+
+    //         // Sort the keys (which are numbers) and get the corresponding URLs
+    //         const sortedUrls = Object.keys(imageUrlsData)
+    //           .sort((a, b) => parseInt(a) - parseInt(b))
+    //           .map((key) => imageUrlsData[key][0])
+    //           .filter((url) => !url.includes("PreviewBridge")); // Filter out preview images
+
+    //         setPanels((prevPanels) =>
+    //           prevPanels.map((panel, index) => ({
+    //             ...panel,
+    //             imageUrl: sortedUrls[index] || null,
+    //           }))
+    //         );
+
+    //         setStatus(GeneratorStatus.GENERATED);
+    //       } catch (error) {
+    //         console.error("Error parsing image URLs:", error);
+    //       }
+    //     }
+
+    //     if (data.event === "workflow_finished") {
+    //       eventSource.close();
+    //       setIsLoading(false);
+    //     }
+    //   } catch (error) {
+    //     console.error("Error processing SSE data:", error);
+    //   }
+    // };
+
+    // eventSource.onerror = (error) => {
+    //   console.error("SSE error:", error);
+    //   eventSource.close();
+    //   setIsLoading(false);
+    //   setStatus(GeneratorStatus.TOPIC_INPUT);
+    // };
   };
 
   const renderPanels = () => {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {panels.map((panel, index) => (
-          <div
-            key={index}
-            className="flex flex-col border rounded overflow-hidden"
-          >
-            <div className="w-full aspect-square bg-gray-200 flex items-center justify-center">
-              {panel.imageUrl ? (
-                <img
-                  src={panel.imageUrl}
-                  alt={`Panel ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  // onError={(e) => {
-                  //   console.error(`Error loading image for panel ${index + 1}:`, e);
-                  //   e.target.src = '/api/placeholder/400/400';
-                  // }}
-                />
-              ) : (
-                <span className="text-gray-500">Image</span>
-              )}
-            </div>
-            <div className="p-2 bg-white">
-              <p className="text-sm">{panel.text}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div>{endImageUrl && <Image src={endImageUrl} alt="end Panel" />}</div>
+      // <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      //   {panels.map((panel, index) => (
+      //     <div
+      //       key={index}
+      //       className="flex flex-col border rounded overflow-hidden"
+      //     >
+      //       <div className="w-full aspect-square bg-gray-200 flex items-center justify-center">
+      //         {panel.imageUrl ? (
+      //           <img
+      //             src={panel.imageUrl}
+      //             alt={`Panel ${index + 1}`}
+      //             className="w-full h-full object-cover"
+      //             // onError={(e) => {
+      //             //   console.error(`Error loading image for panel ${index + 1}:`, e);
+      //             //   e.target.src = '/api/placeholder/400/400';
+      //             // }}
+      //           />
+      //         ) : (
+      //           <span className="text-gray-500">Image</span>
+      //         )}
+      //       </div>
+      //       <div className="p-2 bg-white">
+      //         <p className="text-sm">{panel.text}</p>
+      //       </div>
+      //     </div>
+      //   ))}
+      // </div>
     );
   };
 

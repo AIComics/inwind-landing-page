@@ -94,7 +94,7 @@ export default function Hero({ lang, locale, CTALocale }) {
           <Image
             width={1024}
             height={600}
-            src={"/og.png"}
+            src={"/logo-workflow.jpg"}
             className="hidden md:flex w-full -mt-10"
             alt="app demo"
           />
