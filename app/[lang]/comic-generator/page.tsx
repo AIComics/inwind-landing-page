@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Edit2, Save, Loader, Search } from "lucide-react";
-import { Image } from "antd";
+import { Image, message } from "antd";
+import { useUser } from "@clerk/nextjs";
 
 const GeneratorStatus = {
   TOPIC_INPUT: "TOPIC_INPUT",
@@ -17,8 +18,19 @@ const ComicGenerator = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingData, setStreamingData] = useState([]);
   const [endImageUrl, setEndImageUrl] = useState<string>("");
+  const { user } = useUser();
 
   const handleGenerateScript = async () => {
+    if (!user?.id) {
+      message.warning("Please sign in first ~");
+      return;
+    }
+
+    if (!topic) {
+      message.warning("Please input topic ~");
+      return;
+    }
+
     setIsLoading(true);
     setStatus(GeneratorStatus.GENERATING);
     setStreamingData([]);

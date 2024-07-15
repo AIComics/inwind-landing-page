@@ -5,11 +5,11 @@ import { SiComicfury } from "react-icons/si";
 import { useEffect, useState } from "react";
 import ThemeToggle from "./themeToggle";
 import LangSwitch from "./langSwitch";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 import { usePathname } from "next/navigation";
 import { defaultLocale } from "@/lib/i18n";
 import { NavLinksList } from "@/lib/navLinksList";
-
 export default function Navbar() {
   const pathname = usePathname();
   const [langName, setLangName] = useState(defaultLocale);
@@ -75,24 +75,45 @@ export default function Navbar() {
 				</label> */}
         <ThemeToggle />
         <LangSwitch />
+
+        <div className="hidden md:block">
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+        </div>
+
         <details className="flex md:hidden dropdown dropdown-end">
           <summary className="btn btn-ghost p-0">
             <MdMenu size={18} />
           </summary>
           <ul className="menu dropdown-content z-[100] p-2 shadow bg-base-100 opacity-100 rounded-box w-52">
-            {linkList.map((link, index) => {
-              return (
-                <li key={index}>
-                  <a
-                    aria-label={link.name}
-                    title={link.name}
-                    href={`/${langName}${link.url}`}
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              );
-            })}
+            <>
+              <li key={"sign-in"}>
+                <SignedOut>
+                  <SignInButton />
+                </SignedOut>
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
+              </li>
+
+              {linkList.map((link, index) => {
+                return (
+                  <li key={index}>
+                    <a
+                      aria-label={link.name}
+                      title={link.name}
+                      href={`/${langName}${link.url}`}
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                );
+              })}
+            </>
           </ul>
         </details>
       </div>
