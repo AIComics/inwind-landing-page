@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   const topic = req.nextUrl.searchParams.get('topic');
+  const user = req.nextUrl.searchParams.get('user');
 
   if (!topic) {
     return new NextResponse('Missing topic parameter', { status: 400 });
@@ -22,7 +23,7 @@ export async function GET(req: NextRequest) {
       {
         inputs: { topic, typesetting: '0' },
         response_mode: 'blocking',
-        user: 'abc-123',
+        user: user,
       },
       {
         headers: {

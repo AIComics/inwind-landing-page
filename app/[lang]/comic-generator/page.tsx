@@ -37,7 +37,9 @@ const ComicGenerator = () => {
     setPanels([]);
 
     const result = await fetch(
-      `/api/get-comic?topic=${encodeURIComponent(topic)}`,
+      `/api/get-comic?topic=${encodeURIComponent(
+        topic
+      )}&user=${encodeURIComponent(user?.primaryEmailAddress?.emailAddress)}`,
       {
         method: "GET",
         headers: {
