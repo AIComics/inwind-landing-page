@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import axios from 'axios';
+import { difyRequest } from "@/app/api/request"
 
 export async function GET(req: NextRequest) {
   const topic = req.nextUrl.searchParams.get('topic');
-  
+
   if (!topic) {
     return new NextResponse('Missing topic parameter', { status: 400 });
-  }
-
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    return new NextResponse('No API key found', { status: 500 });
   }
 
   const encoder = new TextEncoder();
@@ -24,18 +19,14 @@ export async function GET(req: NextRequest) {
 
         sendEvent('debug', { message: 'Stream started' });
 
-        const response = await axios.post(
-          'https://dify.tonori.cn/v1/workflows/run',
+        const response = await difyRequest.post(
+          '/workflows/run',
           {
             inputs: { topic, typesetting: '0' },
             response_mode: 'streaming',
             user: 'abc-123',
           },
           {
-            headers: {
-              Authorization: `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
-            },
             responseType: 'stream',
           }
         );

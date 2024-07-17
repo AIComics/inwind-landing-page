@@ -1,4 +1,7 @@
 {
+  "navbar": {
+    "sign_in": "Sign in"
+  },
   "Hero": {
     "h1": "AI Comic Workshop",
     "h2": "AI-Comic-Workshop is a free, open-source comic creation tool that allows you to quickly generate storyboards and comic images by inputting minimal content, making it easy to create professional-quality comic works."

@@ -1,41 +1,75 @@
 // 这个模块定义了一些用于生成响应的函数
+import { NextResponse } from 'next/server';
 
-// respData函数用于生成一个成功的响应，它接受一个数据对象作为参数，并将其作为响应的data字段返回
-export function respData(data: any) {
-  console.log('data in resp :>> ', data);
-  return respJson(0, "ok", data || []);
+
+export interface SuccessfulResp<D = any> {
+    code: number;
+    message: string;
+    data?: D
 }
 
-export function respDifyData(resData: any) {
-  return new Response(JSON.stringify(resData.data), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+export interface ErrorResp {
+    code: number;
+    message: string;
 }
 
-// respOk函数用于生成一个成功的响应，但不包含任何数据
-export function respOk() {
-  return respJson(0, "ok");
+export class SuccessfulResponse {
+    code: number;
+    message: string;
+    data?: any
+
+    constructor({code, message, data}: Partial<SuccessfulResp> = {}) {
+        this.code = code ?? 0;
+        this.message = message ?? "success";
+        this.data = data;
+    }
+
+    json() {
+        return Response.json({
+            code: this.code,
+            message: this.message,
+            data: this.data
+        })
+    }
+
+    nextResponse(status: number = 200) {
+        return new NextResponse(JSON.stringify({
+            code: this.code,
+            message: this.message,
+            data: this.data
+        }), {
+            status,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+    }
 }
 
-// respErr函数用于生成一个失败的响应，它接受一个错误消息作为参数，并将其作为响应的message字段返回
-export function respErr(message: string) {
-  return respJson(-1, message);
+export class ErrorResponse {
+    code: number;
+    message: string
+
+    constructor({code, message}: Partial<ErrorResp> = {}) {
+        this.code = code ?? -1;
+        this.message = message ?? "INTERNAL_SERVER_ERROR";
+    }
+
+    json() {
+        return Response.json({
+            code: this.code,
+            message: this.message
+        })
+    }
+
+    nextResponse(status: number = 500) {
+        return new NextResponse(JSON.stringify({
+            code: this.code,
+            message: this.message
+        }), {
+            status
+        })
+    }
 }
 
-// respJson函数用于生成一个通用的响应对象，它接受一个状态码、一个消息和一个数据对象作为参数，并将它们封装成一个JSON对象返回
-export function respJson(code: number, message: string, data?: any) {
-  let json = {
-    code: code,
-    message: message,
-    respData: data,
-  };
-  if (data) {
-    json["respData"] = data;
-  }
-
-  return Response.json(json);
-}
 

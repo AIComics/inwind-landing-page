@@ -8,18 +8,16 @@ export default function LangSwitch() {
 	const pathname = usePathname();
 	const router = useRouter();
 
-	let langName = lang && lang !== 'index' ? lang : defaultLocale;
-
 	const handleSwitchLanguage = (value) => {
 		return () => {
 			let newPathname;
-			if (pathname == '/') {
+			if (pathname === '/') {
 				newPathname = `/${value}`;
 			} else {
 				if (value === defaultLocale) {
 					newPathname = '/';
 				} else {
-					newPathname = pathname.replace(`/${langName}`, `/${value}`);
+					newPathname = pathname.replace(`/${lang}`, `/${value}`);
 				}
 			}
 			router.replace(newPathname);
@@ -33,7 +31,7 @@ export default function LangSwitch() {
 				role='button'
 				className='flex items-center justify-center md:bg-base-100 md:rounded-full w-15 md:w-[100px] h-5 text-sm md:h-8 md:shadow-sm md:hover:shadow-md transition-all'
 			>
-				{localeNames[langName]}
+				{localeNames[lang]}
 			</div>
 			<ul
 				tabIndex={0}

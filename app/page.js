@@ -2,8 +2,8 @@ import { defaultLocale, getDictionary } from "@/lib/i18n";
 
 import Hero from "@/components/home/hero";
 import Feature from "@/components/home/feature";
-import Pricing from "@/components/home/pricing";
-import Testimonial from "@/components/home/testimonial";
+// import Pricing from "@/components/home/pricing";
+// import Testimonial from "@/components/home/testimonial";
 import Faq from "@/components/home/faq";
 import Cta from "@/components/home/cta";
 

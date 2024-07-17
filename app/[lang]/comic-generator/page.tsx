@@ -21,10 +21,10 @@ const ComicGenerator = () => {
   const { user } = useUser();
 
   const handleGenerateScript = async () => {
-    if (!user?.id) {
-      message.warning("Please sign in first ~");
-      return;
-    }
+    // if (!user?.id) {
+    //   message.warning("Please sign in first ~");
+    //   return;
+    // }
 
     if (!topic) {
       message.warning("Please input topic ~");
@@ -51,7 +51,7 @@ const ComicGenerator = () => {
     try {
       const rowData = await result.json();
       console.log("🚀 ~ handleGenerateScript ~ rowData:", rowData);
-      const targetPhotoData: string[] = JSON.parse(rowData.data.outputs?.text);
+      const targetPhotoData: string[] = JSON.parse(rowData.data.data.outputs?.text);
       setEndImageUrl(targetPhotoData["88"][0]); // 临时处理，直接拿最后一张
       setIsLoading(false);
       setStatus(GeneratorStatus.GENERATED);
@@ -182,9 +182,9 @@ const ComicGenerator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-extrabold text-gray-900 text-center mb-8">
+        <h1 className="font-bold text-3xl md:text-5xl bg-gradient-to-r from-base-content from-50% to-[#9c9c9c] md:text-center bg-clip-text text-transparent !leading-[1.25em] mb-5">
           Comic Generator
         </h1>
         <div className="relative mb-12">
