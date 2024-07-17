@@ -10,8 +10,8 @@ export async function POST(req: Request) {
 
     return new SuccessfulResponse({
       data
-    });
+    }).nextResponse();
   } catch (e) {
-    return new ErrorResponse();
+    return new ErrorResponse().nextResponse();
   }
 }
