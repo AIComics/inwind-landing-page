@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react"
-import {usePathname} from "next/navigation";
+import { usePathname } from "next/navigation";
 import { defaultLocale, getDictionary } from "@/lib/i18n"
 
 export async function useI18n(locale: string = defaultLocale) {
     return await getDictionary(locale);
 }
 
-export const useLocale = (defaultValue?: string ) => {
+export const useLocale = (_defaultLocale?: string ) => {
     const pathname = usePathname();
 
-
-    const [locale, setLocale] = useState(defaultValue ?? defaultLocale)
+    const [locale, setLocale] = useState(_defaultLocale ?? defaultLocale)
 
     useEffect(() => {
         if (pathname !== "/") {
